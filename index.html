@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>贊助VTuber - 綠界科技ECPay</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 { color: #ffdd57; margin-bottom: 20px; }
+    form {
+      background: #1b1b1b;
+      display: inline-block;
+      padding: 20px;
+      border-radius: 12px;
+      width: 340px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.5);
+    }
+    label { display: block; margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #ddd; }
+    input[type=number], input[type=text], textarea {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      width: 90%;
+      margin: 5px auto 12px;
+      display: block;
+      font-size: 15px;
+    }
+    textarea { resize: none; height: 80px; }
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      background: #2b6fff;
+      color: #fff;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 15px;
+    }
+    button:hover { background: #1a4de0; }
+    .quick-buttons { margin: 10px 0; }
+    img.banner { max-width: 100%; border-radius: 12px; margin-bottom: 20px; }
+    .note {
+      font-size: 13px;
+      color: #aaa;
+      text-align: left;
+      margin: 10px auto 15px;
+      width: 90%;
+      line-height: 1.5;
+    }
+    .note ul {
+      padding-left: 20px;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- 頂部圖片 -->
+  <img class="banner" src="images/channels4_banner.jpg" alt="Banner">
+
+  <h1>焼主公朝貢獻金</h1> 
+
+  <form id="donateForm" action="#" method="post" accept-charset="UTF-8" onsubmit="return validateAmount()">
+    <label for="name">贊助者名稱：</label>
+    <input id="name" name="name" type="text" placeholder="輸入您的名字">
+
+    <label for="amount">贊助者金額 (TWD)：</label>
+    <input id="amount" name="amount" type="number" min="88" required>
+
+    <div class="quick-buttons">
+      <button type="button" onclick="setAmount(88)">+88</button>
+      <button type="button" onclick="setAmount(100)">+100</button>
+      <button type="button" onclick="setAmount(500)">+500</button>
+      <button type="button" onclick="setAmount(1000)">+1000</button>
+    </div>
+
+    <!-- 提示文字 -->
+    <div class="note">
+      <ul>
+        <li>*贊助金額最低為 88 元。</li>
+        <li>*贊助金額超過 6,000元或小於 34元，無法使用超商代碼付款。</li>
+        <li>*贊助金額超過 49,999元或小於 16元，無法使用網路ATM付款。</li>
+        <li>*贊助金額超過 49,999元或小於 16元，無法使用ATM櫃員機付款。</li>
+        <li>*贊助金額超過 199,999元或小於 6元，無法使用信用卡付款。</li>
+      </ul>
+    </div>
+
+    <label for="message">留言（選填）：</label>
+    <textarea id="message" name="message" placeholder="輸入想說的話..."></textarea>
+
+    <button type="submit">前往付款</button>
+  </form>
+
+  <script>
+    function setAmount(value) {
+      document.getElementById('amount').value = value;
+    }
+
+    function validateAmount() {
+      const val = parseInt(document.getElementById('amount').value, 10);
+      if (isNaN(val) || val < 88) {
+        alert("金額必須大於或等於 88");
+        return false;
+      }
+      return true;
+    }
+
+    // ====== 偵測伺服器是否在線 ======
+    fetch("https://funding.yaya756.work/funding/create_order_prod.php?ping=1", {method:"GET", cache:"no-store"})
+      .then(r => r.text())
+      .then(text => {
+        if (text.trim() === "ok") {
+          // ✅ 伺服器在線 → 使用你的 PHP (即時通知)
+          document.getElementById("donateForm").action = "https://funding.yaya756.work/funding/create_order_prod.php";
+          console.log("✅ 使用自家伺服器，OBS 即時通知啟用");
+        } else {
+          throw new Error("invalid response");
+        }
+      })
+      .catch(err => {
+        // ⚠️ 伺服器不在線 → fallback 到官方收款網址
+        document.getElementById("donateForm").action = "https://p.ecpay.com.tw/C934766";
+        console.log("⚠️ 使用官方 ECPay，沒有即時通知");
+      });
+  </script>
+</body>
+</html>
